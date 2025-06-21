@@ -29,3 +29,4 @@ instance
 .hypothes.is
 .hypothesis
 .pytest_cache
+.DS_Store
