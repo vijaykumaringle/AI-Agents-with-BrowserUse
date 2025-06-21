@@ -1,5 +1,4 @@
 import asyncio
-import os
 from dotenv import load_dotenv
 load_dotenv()
 from browser_use import Agent
@@ -10,9 +9,10 @@ async def main():
     llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-exp')
     
     agent = Agent(
-        task="Check Iphone 16 512gb price in Amazon.in and Flipkart.com. And then compare the prices",
+        task="Check Iphone 16 256gb price in Amazon.in and Flipkart.com. And then compare the prices",
         llm=llm
     )
-    await agent.run()
+    result = await agent.run()
+    print(f"\nFinal Result: {result}")
 
 asyncio.run(main())
