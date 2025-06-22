@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pathlib import Path
 from datetime import datetime
+import json
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,28 +45,25 @@ async def main():
         # Run the agent
         result = await agent.run()
         
-        # Extract and format the summary
+        # Extract and print only the summary text
         try:
-            # Find the last action result which contains the summary
-            summary_result = result.all_results[-1]
-            summary_text = summary_result.extracted_content
-            
-            # Format the output
-            print("\n=== Vitthal Vari Summary ===")
-            print("\n" + summary_text)
-            print("\n=== Summary Data ===")
-            
-            # Try to extract JSON data if available
+            # Find the action with the summary
             for action in result.all_results:
-                if "summary" in action.extracted_content:
+                if action.extracted_content and "summary" in action.extracted_content:
                     try:
-                        import json
-                        json_data = json.loads(action.extracted_content.split("```json")[1].split("```")[0])
-                        print("\nExtracted JSON Data:")
-                        print(json.dumps(json_data, indent=2))
+                        # Extract JSON data
+                        json_str = action.extracted_content.split("```json")[1].split("```json")[0]
+                        json_data = json.loads(json_str)
+                        print(json_data["summary"])
+                        break
                     except Exception as e:
                         logger.warning(f"Could not extract JSON data: {e}")
                         
+            # If we didn't find JSON data, try the final result
+            if not any("summary" in action.extracted_content for action in result.all_results):
+                final_result = result.all_results[-1].extracted_content
+                print(final_result)
+                
         except Exception as e:
             logger.error(f"Error processing results: {e}")
             print("\n=== Raw Results ===")
