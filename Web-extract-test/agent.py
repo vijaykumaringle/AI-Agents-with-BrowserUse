@@ -43,8 +43,32 @@ async def main():
         # Run the agent
         result = await agent.run()
         
-        # Print the result
-        print(result)
+        # Extract and format the summary
+        try:
+            # Find the last action result which contains the summary
+            summary_result = result.all_results[-1]
+            summary_text = summary_result.extracted_content
+            
+            # Format the output
+            print("\n=== Vitthal Vari Summary ===")
+            print("\n" + summary_text)
+            print("\n=== Summary Data ===")
+            
+            # Try to extract JSON data if available
+            for action in result.all_results:
+                if "summary" in action.extracted_content:
+                    try:
+                        import json
+                        json_data = json.loads(action.extracted_content.split("```json")[1].split("```")[0])
+                        print("\nExtracted JSON Data:")
+                        print(json.dumps(json_data, indent=2))
+                    except Exception as e:
+                        logger.warning(f"Could not extract JSON data: {e}")
+                        
+        except Exception as e:
+            logger.error(f"Error processing results: {e}")
+            print("\n=== Raw Results ===")
+            print(result)
         
         logger.info("Automation completed successfully!")
         
